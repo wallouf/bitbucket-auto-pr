@@ -7,6 +7,7 @@ Search throught Bitbucket projects / repo / branch and create PR for all repo th
    - json
    - requests ( Use pip to install requests )
    - base64
+   - sys
  - For bitbucket:
    - Account valid
    - Rights to create a PR on repositories scanned
