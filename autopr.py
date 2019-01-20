@@ -14,6 +14,9 @@ URL_suffix_pullrequest = '/pullrequests/'
 
 
 def main():
+        repositories = []
+        repositories_to_pr = []
+
         if len(sys.argv) >= 8:
                 #Retrieve team name
                 teamname = sys.argv[1]
@@ -44,51 +47,52 @@ def main():
 
         pwd = username + ':' + password
         base64_pwd = 'Basic ' + base64.b64encode(pwd.encode('utf-8')).decode('utf-8')
-        repositories = []
-        repositories_to_pr = []
+
         print('### GET ALL PROJECTS FOR EPS')
         # GET ALL PROJECTS FOR EPS
         projects = list_projects(base64_pwd, teamname, project_begin_with)
         print('\tFound: ' + str(len(projects)) + ' active projects')
+
         # GET ALL REPO FOR THESE PROJECTS
         print('### GET ALL REPO FOR THESE PROJECTS')
         for project in projects:
                 repositories = repositories + list_repo(project, base64_pwd, teamname)
         print('\tFound: ' + str(len(repositories)) + ' repositories')
+
         # GET DIFF BETWEEN LAST COMMIT FOR EACH REPO
         print('### GET DIFF BETWEEN BRANCHES LAST COMMIT FOR EACH REPO')
         for repository in repositories:
                 if compare_branches_and_check_required_PR(repository, base64_pwd, teamname,source, destination, change_min_counter_trigger_for_PR):
                         repositories_to_pr.append(repository)
         print('\tFound: ' + str(len(repositories_to_pr)) + ' repositories that required a PR')
+
         # CREATE PR FOR REPO THAT REQUIRED ONE
         print('### CREATE PR FOR REPO THAT REQUIRED ONE')
         if len(repositories_to_pr) > 0:
                 f = open("pullrequests_links.txt","w+")
                 f.write("\n")
-                f.write("\n")
-                f.write("\n")
-                pr_object = {}
-                pr_object['title'] = 'Merge branches'
-                pr_object['description'] = 'Automatic'
-                pr_object['close_source_branch'] = False
-                pr_object['reviewers'] = []
-                pr_object['destination'] = {}
-                pr_object['destination']['branch'] = {}
-                pr_object['destination']['branch']['name'] = destination
-                pr_object['source'] = {}
-                pr_object['source']['branch'] = {}
-                pr_object['source']['branch']['name'] = source
-                pr_object['source']['repository'] = {}
+                pr_object = create_PR_object(source, destination)
                 for repository in repositories_to_pr:
                         pr_object['source']['repository']['full_name'] = 'expertustechnologies/' + str(repository)
                         url_pr = str(create_PR(repository, pr_object, base64_pwd, teamname))
                         if url_pr != 'None':
                                 f.write(url_pr + "\n")
                 f.write("\n")
-                f.write("\n\n")
-                f.write("\n")
         print('### END OF SCRIPT. You can find PR links in the file "pullrequests_links.txt"')
+def create_PR_object(source, destination):
+        pr_object = {}
+        pr_object['title'] = 'Merge branches'
+        pr_object['description'] = 'Automatic'
+        pr_object['close_source_branch'] = False
+        pr_object['reviewers'] = []
+        pr_object['destination'] = {}
+        pr_object['destination']['branch'] = {}
+        pr_object['destination']['branch']['name'] = destination
+        pr_object['source'] = {}
+        pr_object['source']['branch'] = {}
+        pr_object['source']['branch']['name'] = source
+        pr_object['source']['repository'] = {}
+        return pr_object
 
 def create_PR(repository, pr_object, base64_pwd, teamname):
         try:
@@ -97,7 +101,7 @@ def create_PR(repository, pr_object, base64_pwd, teamname):
                 'Content-Type': 'application/json'
 
                 }
-                url = URL_repositories + teamname + repository + URL_suffix_pullrequest
+                url = URL_repositories + teamname + '/' + repository + URL_suffix_pullrequest
                 resp = requests.post(url, headers=header, data=json.dumps(pr_object))
                 if resp.status_code != 201:
                         print('Cannot create PR : response code: ' + str(resp.status_code) + 'reason: '+ str(resp.reason))
