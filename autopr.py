@@ -79,6 +79,7 @@ def main():
                                 f.write(url_pr + "\n")
                 f.write("\n")
         print('### END OF SCRIPT. You can find PR links in the file "pullrequests_links.txt"')
+        
 def create_PR_object(source, destination):
         pr_object = {}
         pr_object['title'] = 'Merge branches'
