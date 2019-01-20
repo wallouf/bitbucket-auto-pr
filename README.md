@@ -1,6 +1,16 @@
 # bitbucket-auto-pr
 Search throught Bitbucket projects / repo / branch and create PR for all repo that have more than x diff
 
+# requirements
+ - For python: 
+   - Python3
+   - json
+   - requests ( Use pip to install requests )
+   - base64
+ - For bitbucket:
+   - Account valid
+   - Rights to create a PR on repositories scanned
+
 # parameters
 
 This python require 7 parameters:
