@@ -16,6 +16,7 @@ URL_suffix_pullrequest = '/pullrequests/'
 def main():
         repositories = []
         repositories_to_pr = []
+        projects_to_ignore = []
 
         if len(sys.argv) >= 8:
                 #Retrieve team name
@@ -30,6 +31,8 @@ def main():
                 destination = sys.argv[6]
                 #trigger for PR
                 change_min_counter_trigger_for_PR = int(sys.argv[7])
+                if len(sys.argv) >= 9:
+                    projects_to_ignore = sys.argv[8].split(',')
         else:
                 #Retrieve team name
                 teamname = input("Enter Bitbucket team name: ")
@@ -44,13 +47,16 @@ def main():
                 destination = input("Enter Bitbucket destination branch: ")
                 #trigger for PR
                 change_min_counter_trigger_for_PR = input("Enter diff min number to trigger PR: ")
+                projects_to_ignore_input = input("[Optional] Enter CSV list of project names to ignore: ")
+                if projects_to_ignore_input:
+                    projects_to_ignore = projects_to_ignore_input.split(',')
 
         pwd = username + ':' + password
         base64_pwd = 'Basic ' + base64.b64encode(pwd.encode('utf-8')).decode('utf-8')
 
         print('### GET ALL PROJECTS FOR EPS')
         # GET ALL PROJECTS FOR EPS
-        projects = list_projects(base64_pwd, teamname, project_begin_with)
+        projects = list_projects(base64_pwd, teamname, project_begin_with, projects_to_ignore)
         print('\tFound: ' + str(len(projects)) + ' active projects')
 
         # GET ALL REPO FOR THESE PROJECTS
@@ -187,7 +193,7 @@ def list_repo(project, base64_pwd, teamname):
                 return return_repo
 
 # Get organizations to check input from calls
-def list_projects(base64_pwd, teamname, project_begin_with):
+def list_projects(base64_pwd, teamname, project_begin_with, projects_to_ignore):
         return_projects = []
         try:
                 header={
@@ -201,7 +207,7 @@ def list_projects(base64_pwd, teamname, project_begin_with):
                                 return return_projects
                         projects = json.loads(resp.text)
                         for project in projects['values']:
-                                if project['key'].startswith(project_begin_with):
+                                if project['key'].startswith(project_begin_with) and project['key'] not in projects_to_ignore:
                                         return_projects.append(project['key'])
                         if 'next' not in projects:
                                 break
