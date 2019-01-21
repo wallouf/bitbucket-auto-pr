@@ -143,10 +143,10 @@ def compare_branches_and_check_required_PR(repository, base64_pwd, teamname, sou
                                         destination_commit_id = repo['target']['hash']
                                 if repo['name'] == source:
                                         source_commit_id = repo['target']['hash']
-                        if (source_commit_id and destination_commit_id) or 'next' not in repo:
+                        if (len(source_commit_id) > 0 and len(destination_commit_id) > 0) or 'next' not in repo:
                                 break
                         url = repo['next']
-                if source_commit_id and destination_commit_id:
+                if len(source_commit_id) > 0 and len(destination_commit_id) > 0:
                         total_changes = 0
                         url = URL_repositories + teamname + '/' + repository.lower() + URL_suffix_diffstat + source_commit_id + '..' + destination_commit_id
                         resp = requests.get(url, headers=header)
