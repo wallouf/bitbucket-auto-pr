@@ -138,15 +138,15 @@ def compare_branches_and_check_required_PR(repository, base64_pwd, teamname, sou
                                 print('Cannot get branches: response code: ' + str(resp.status_code))
                                 return result
                         repo = json.loads(resp.text)
-                        for repo in repo['values']:
-                                if repo['name'] == destination:
-                                        destination_commit_id = repo['target']['hash']
-                                if repo['name'] == source:
-                                        source_commit_id = repo['target']['hash']
-                        if (len(source_commit_id) > 0 and len(destination_commit_id) > 0) or 'next' not in repo:
+                        for repo_value in repo['values']:
+                                if repo_value['name'] == destination:
+                                        destination_commit_id = repo_value['target']['hash']
+                                if repo_value['name'] == source:
+                                        source_commit_id = repo_value['target']['hash']
+                        if (source_commit_id and destination_commit_id) or 'next' not in repo:
                                 break
                         url = repo['next']
-                if len(source_commit_id) > 0 and len(destination_commit_id) > 0:
+                if source_commit_id and destination_commit_id:
                         total_changes = 0
                         url = URL_repositories + teamname + '/' + repository.lower() + URL_suffix_diffstat + source_commit_id + '..' + destination_commit_id
                         resp = requests.get(url, headers=header)
@@ -154,9 +154,9 @@ def compare_branches_and_check_required_PR(repository, base64_pwd, teamname, sou
                                 print('Cannot get diff: response code: ' + str(resp.status_code))
                                 return result
                         repo = json.loads(resp.text)
-                        for repo in repo['values']:
-                                total_changes += repo['lines_removed']
-                                total_changes += repo['lines_added']
+                        for repo_value in repo['values']:
+                                total_changes += repo_value['lines_removed']
+                                total_changes += repo_value['lines_added']
                         if total_changes >=      change_min_counter_trigger_for_PR:
                                 print("\t\t[ PR ] Diff between branches for " + str(repository) + ": " + str(total_changes))
                                 return True
@@ -168,7 +168,6 @@ def compare_branches_and_check_required_PR(repository, base64_pwd, teamname, sou
                 return result
 
 
-# Get organizations to check input from calls
 def list_repo(project, base64_pwd, teamname):
         return_repo = []
         try:
@@ -182,8 +181,8 @@ def list_repo(project, base64_pwd, teamname):
                                 print('Cannot get repo: response code: ' + str(resp.status_code))
                                 return return_repo
                         repo = json.loads(resp.text)
-                        for repo in repo['values']:
-                                return_repo.append(repo['name'])
+                        for repo_value in repo['values']:
+                                return_repo.append(repo_value['name'])
                         if 'next' not in repo:
                                 break
                         url = repo['next']
@@ -192,7 +191,6 @@ def list_repo(project, base64_pwd, teamname):
                 print(e)
                 return return_repo
 
-# Get organizations to check input from calls
 def list_projects(base64_pwd, teamname, project_begin_with, projects_to_ignore):
         return_projects = []
         try:
