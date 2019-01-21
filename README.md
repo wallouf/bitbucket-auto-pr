@@ -14,7 +14,7 @@ Search throught Bitbucket projects / repo / branch and create PR for all repo th
 
 # parameters
 
-This python require 7 parameters:
+This python require 7 parameters + 1 optional:
  - team name ( string )
  - username ( string )
  - password ( string )
@@ -22,6 +22,7 @@ This python require 7 parameters:
  - source branch ( string )
  - destination branch ( string )
  - diff number min to trigger PR creation ( int )
+ - [optional] list of project name to ignore ( string csv )
  
  ## Note: 
   - Parameters can be given at call, or by input
