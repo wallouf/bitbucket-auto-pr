@@ -108,7 +108,7 @@ def create_PR(repository, pr_object, base64_pwd, teamname):
                         print('Cannot create PR : response code: ' + str(resp.status_code) + 'reason: '+ str(resp.reason))
                         return 
                 repo = json.loads(resp.text)
-                url_pr = repo['links']['self']['href']
+                url_pr = repo['links']['html']['href']
                 print("\t\t" + str(url_pr))
                 return url_pr
         except Exception as e:
